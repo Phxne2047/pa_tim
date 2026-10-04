@@ -83,8 +83,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "471efe0212dbb207",
@@ -191,7 +190,8 @@
   },
   "active": "d9ffbc8607a5b1bc",
   "lastOpenFiles": [
-    "Plan/PROJECT_PLAN.md",
-    "Plan/DATABASE_SCHEMA.md"
+    "Plan/01-CUSTOMER.md",
+    "Plan/DATABASE_SCHEMA.md",
+    "Plan/PROJECT_PLAN.md"
   ]
 }

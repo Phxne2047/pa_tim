@@ -24,19 +24,19 @@
 ### 1) ตาราง `system_settings` (ตั้งค่าระบบและต้นทุนร้าน)
 > เก็บค่าคงที่และพารามิเตอร์สำหรับคำนวณเส้นทางและคำนวณกำไร/เวลา (ใช้แถวเดียว `id = 1`)
 
-| Column Name                | Data Type      |  Key   | Description / ข้อกำหนดโจทย์                          |
-| :------------------------- | :------------- | :----: | :--------------------------------------------------- |
-| `id`                       | INT            | **PK** | รหัสตั้งค่า (ค่าคงที่ `1`)                           |
-| `restaurant_name`          | VARCHAR(100)   |        | ชื่อร้าน (เช่น 'ร้านข้าวกล่อง PaTim')                |
-| `restaurant_lat`           | DECIMAL(10, 7) |        | ละติจูดร้านค้า (ม.มหาสารคาม: `16.2468256`)           |
-| `restaurant_lng`           | DECIMAL(10, 7) |        | ลองจิจูดร้านค้า (ม.มหาสารคาม: `103.2520721`)         |
-| `box_price`                | DECIMAL(10, 2) |        | ราคาขายต่อกล่อง (`65.00` บาท)                        |
-| `box_cost`                 | DECIMAL(10, 2) |        | ต้นทุนอาหารต่อกล่อง (`40.00` บาท)                    |
-| `rider_base_fee`           | DECIMAL(10, 2) |        | ค่าเรียกรถขั้นต่ำต่อรอบ (`15.00` บาท/คน)             |
-| `rider_per_km_per_box_fee` | DECIMAL(10, 2) |        | ค่าส่งผันแปร (`2.00` บาท/กม./กล่อง)                  |
-| `rider_speed_km_h`         | DECIMAL(5, 2)  |        | ความเร็วเฉลี่ยไรเดอร์ (`30.00` กม./ชม. = 2 นาที/กม.) |
-| `max_orders_per_rider`     | INT            |        | ส่งสูงสุดต่อคน (`3` ออเดอร์/จุด)                     |
-| `max_delivery_minutes`     | INT            |        | กรอบเวลาจัดส่งสูงสุด (`60` นาที: 11:30 - 12:30 น.)   |
+| Column Name    | Data Type      |  Key   | Description / ข้อกำหนดโจทย์                          |
+| :------------- | :------------- | :----: | :--------------------------------------------------- |
+| `id`           | INT            | **PK** | รหัสตั้งค่า (ค่าคงที่ `1`)                           |
+| `name`         | VARCHAR(100)   |        | ชื่อร้าน (เช่น 'ร้านข้าวกล่อง PaTim')                |
+| `latitude`     | DECIMAL(10, 7) |        | ละติจูดร้านค้า (ม.มหาสารคาม: `16.2468256`)           |
+| `longitude`    | DECIMAL(10, 7) |        | ลองจิจูดร้านค้า (ม.มหาสารคาม: `103.2520721`)         |
+| `box_price`    | DECIMAL(10, 2) |        | ราคาขายต่อกล่อง (`65.00` บาท)                        |
+| `box_cost`     | DECIMAL(10, 2) |        | ต้นทุนอาหารต่อกล่อง (`40.00` บาท)                    |
+| `rider_base`   | DECIMAL(10, 2) |        | ค่าเรียกรถขั้นต่ำต่อรอบ (`15.00` บาท/คน)             |
+| `rider_km_box` | DECIMAL(10, 2) |        | ค่าส่งผันแปร (`2.00` บาท/กม./กล่อง)                  |
+| `rider_speed`  | DECIMAL(5, 2)  |        | ความเร็วเฉลี่ยไรเดอร์ (`30.00` กม./ชม. = 2 นาที/กม.) |
+| `max_orders`   | INT            |        | ส่งสูงสุดต่อคน (`3` ออเดอร์/จุด)                     |
+| `max_minutes`  | INT            |        | กรอบเวลาจัดส่งสูงสุด (`60` นาที: 11:30 - 12:30 น.)   |
 
 ---
 
@@ -58,12 +58,12 @@
 ### 3) ตาราง `riders` (ข้อมูลไรเดอร์และสีประจำเส้นทาง)
 > เก็บข้อมูลไรเดอร์ พร้อมรหัสสีสำหรับวาดเส้นทางแยกสีบนแผนที่ของร้านค้า
 
-| Column Name | Data Type | Key | Description / การใช้งาน |
-| :--- | :--- | :---: | :--- |
-| `id` | VARCHAR(50) | **PK** | รหัสไรเดอร์ (เช่น 'RD-01') |
-| `name` | VARCHAR(150) | | ชื่อไรเดอร์ (เช่น 'คุณสมชาย ใจดี') |
-| `phone` | VARCHAR(20) | | เบอร์โทรศัพท์ติดต่อ |
-| `route_color` | VARCHAR(20) | | สีประจำตัววาดเส้น Map (เช่น `#EF4444`, `#10B981`, `#3B82F6`) |
+| Column Name | Data Type    |  Key   | Description / การใช้งาน                                      |
+| :---------- | :----------- | :----: | :----------------------------------------------------------- |
+| `id`        | VARCHAR(50)  | **PK** | รหัสไรเดอร์ (เช่น 'RD-01')                                   |
+| `name`      | VARCHAR(150) |        | ชื่อไรเดอร์ (เช่น 'คุณสมชาย ใจดี')                           |
+| `phone`     | VARCHAR(20)  |        | เบอร์โทรศัพท์ติดต่อ                                          |
+| `color`     | VARCHAR(20)  |        | สีประจำตัววาดเส้น Map (เช่น `#EF4444`, `#10B981`, `#3B82F6`) |
 
 ---
 
@@ -73,12 +73,11 @@
 | Column Name    | Data Type   |  Key   | Description / การใช้งาน                                 |
 | :------------- | :---------- | :----: | :------------------------------------------------------ |
 | `id`           | VARCHAR(50) | **PK** | รหัสออเดอร์ (เช่น 'ORD-001')                            |
-| `order_code`   | VARCHAR(50) |        | เลขที่แสดงผลออเดอร์ (เช่น 'ORD-001')                    |
 | `customer_id`  | VARCHAR(50) | **FK** | อ้างอิง `customers.id`                                  |
 | `box_quantity` | INT         |        | จำนวนกล่อง (เงื่อนไข: **1 - 3 กล่อง**)                  |
 | `status`       | VARCHAR(20) |        | สถานะ (`pending`, `assigned`, `delivered`, `cancelled`) |
 | `created_at`   | TIMESTAMP   |        | วันที่และเวลาที่สั่งซื้อ (ช่วง 10:00 น.)                |
-| `menu`         | VARCHAR(50) |        | เมนูอาหาร                                               |
+| `menu`         | VARCHAR(50) |        | ชื่อเมนูอาหาร                                           |
 
 ---
 
@@ -93,7 +92,7 @@
 | `total_boxes`       | INT            |        | จำนวนกล่องรวมทั้งหมด                                                        |
 | `total_riders`      | INT            |        | จำนวนไรเดอร์ที่ต้องเรียกใช้                                                 |
 | `total_distance_km` | DECIMAL(10, 2) |        | ระยะทางรวมทุกสายส่ง (กม.)                                                   |
-| `total_rider_fee`   | DECIMAL(10, 2) |        | ค่าจ้างไรเดอร์รวม: $\sum [15 + (\text{dist} \times 2 \times \text{boxes})]$ |
+| `total_rider_price` | DECIMAL(10, 2) |        | ค่าจ้างไรเดอร์รวม: $\sum [15 + (\text{dist} \times 2 \times \text{boxes})]$ |
 | `total_revenue`     | DECIMAL(10, 2) |        | รายรับรวม: $\text{total\_boxes} \times 65$                                  |
 | `total_food_cost`   | DECIMAL(10, 2) |        | ต้นทุนอาหารรวม: $\text{total\_boxes} \times 40$                             |
 | `total_profit`      | DECIMAL(10, 2) |        | กำไรสุทธิ: $(\text{total\_boxes} \times 25) - \text{total\_delivery\_fee}$  |
@@ -106,35 +105,35 @@
 ### 6) ตาราง `delivery_routes` (สายส่งประจำไรเดอร์แต่ละคน / Job Batch)
 > เก็บข้อมูลสายส่งที่จัดสรรให้ไรเดอร์แต่ละคน สำหรับแสดงสรุปงานและให้ไรเดอร์ค้นหา Job Code
 
-| Column Name | Data Type | Key | Description / การใช้งาน |
-| :--- | :--- | :---: | :--- |
-| `id` | VARCHAR(50) | **PK** | รหัสสายส่ง (เช่น 'ROUTE-01') |
-| `dispatch_id` | VARCHAR(50) | **FK** | อ้างอิง `dispatches.id` |
-| `rider_id` | VARCHAR(50) | **FK** | อ้างอิง `riders.id` |
-| `job_code` | VARCHAR(50) | **INDEX** | เลขใบงานสำหรับไรเดอร์ค้นหา (เช่น 'JOB-MSU-01') |
-| `total_orders` | INT | | จำนวนออเดอร์ในสายนี้ (**$\le 3$ ออเดอร์**) |
-| `total_boxes` | INT | | จำนวนกล่องที่ต้องบรรทุก (**$\le 10$ กล่อง**) |
-| `total_distance_km` | DECIMAL(10, 2) | | ระยะทางรวมของสายนี้ (กม.) |
-| `estimated_minutes` | DECIMAL(5, 2) | | เวลาที่ใช้จัดส่งทั้งหมด (**$\le 60$ นาที**) |
-| `delivery_fee` | DECIMAL(10, 2) | | ค่าจ้างของสายนี้: $15 + (\text{distance} \times 2 \times \text{boxes})$ |
-| `net_profit` | DECIMAL(10, 2) | | กำไรสุทธิของสายนี้: $(\text{boxes} \times 25) - \text{delivery\_fee}$ |
-| `status` | VARCHAR(20) | | สถานะสายส่ง (`pending`, `delivering`, `completed`) |
+| Column Name         | Data Type      |    Key    | Description / การใช้งาน                                                 |
+| :------------------ | :------------- | :-------: | :---------------------------------------------------------------------- |
+| `id`                | VARCHAR(50)    |  **PK**   | รหัสสายส่ง (เช่น 'ROUTE-01')                                            |
+| `dispatch_id`       | VARCHAR(50)    |  **FK**   | อ้างอิง `dispatches.id`                                                 |
+| `rider_id`          | VARCHAR(50)    |  **FK**   | อ้างอิง `riders.id`                                                     |
+| `job_code`          | VARCHAR(50)    | **INDEX** | เลขใบงานสำหรับไรเดอร์ค้นหา (เช่น 'JOB-MSU-01')                          |
+| `total_orders`      | INT            |           | จำนวนออเดอร์ในสายนี้ (**$\le 3$ ออเดอร์**)                              |
+| `total_boxes`       | INT            |           | จำนวนกล่องที่ต้องบรรทุก (**$\le 10$ กล่อง**)                            |
+| `total_distance_km` | DECIMAL(10, 2) |           | ระยะทางรวมของสายนี้ (กม.)                                               |
+| `time_delivery`     | DECIMAL(5, 2)  |           | เวลาที่ใช้จัดส่งทั้งหมด (**$\le 60$ นาที**)                             |
+| `delivery_price`    | DECIMAL(10, 2) |           | ค่าจ้างของสายนี้: $15 + (\text{distance} \times 2 \times \text{boxes})$ |
+| `net_profit`        | DECIMAL(10, 2) |           | กำไรสุทธิของสายนี้: $(\text{boxes} \times 25) - \text{delivery\_fee}$   |
+| `status`            | VARCHAR(20)    |           | สถานะสายส่ง (`pending`, `delivering`, `completed`)                      |
 
 ---
 
 ### 7) ตาราง `route_stops` (ลำดับจุดแวะส่งของไรเดอร์)
 > สำหรับสมาชิกลำดับที่ 4 ใช้แสดงลำดับการส่ง `1 -> 2 -> 3`, เปิดนำทาง Google Maps และกดบันทึกส่งสำเร็จ
 
-| Column Name             | Data Type             |  Key   | Description / การใช้งาน                                       |
-| :---------------------- | :-------------------- | :----: | :------------------------------------------------------------ |
-| `id`                    | BIGINT / INT AUTO_INC | **PK** | รหัสจุดส่ง                                                    |
-| `route_id`              | VARCHAR(50)           | **FK** | อ้างอิง `delivery_routes.id`                                  |
-| `order_id`              | VARCHAR(50)           | **FK** | อ้างอิง `orders.id` (ดึงชื่อลูกค้า, เบอร์, พิกัด, กล่อง)      |
-| `stop_sequence`         | INT                   |        | ลำดับการส่ง (**1, 2, 3**)                                     |
-| `distance_from_prev_km` | DECIMAL(10, 2)        |        | ระยะทางจากจุดก่อนหน้า (กม.)                                   |
-| `estimated_minutes`     | DECIMAL(5, 2)         |        | เวลารวมตั้งแต่เริ่มส่งถึงจุดนี้ (นาที)                        |
-| `status`                | VARCHAR(20)           |        | สถานะจุดส่ง (`pending`, `in_progress`, `delivered`, `failed`) |
-| `delivered_at`          | TIMESTAMP             |        | เวลาที่ไรเดอร์กดส่งสำเร็จ                                     |
+| Column Name       | Data Type             |  Key   | Description / การใช้งาน                                       |
+| :---------------- | :-------------------- | :----: | :------------------------------------------------------------ |
+| `id`              | BIGINT / INT AUTO_INC | **PK** | รหัสจุดส่ง                                                    |
+| `route_id`        | VARCHAR(50)           | **FK** | อ้างอิง `delivery_routes.id`                                  |
+| `order_id`        | VARCHAR(50)           | **FK** | อ้างอิง `orders.id` (ดึงชื่อลูกค้า, เบอร์, พิกัด, กล่อง)      |
+| `stop_number`     | INT                   |        | ลำดับการส่ง (**1, 2, 3**)                                     |
+| `distance_before` | DECIMAL(10, 2)        |        | ระยะทางจากจุดก่อนหน้า (กม.)                                   |
+| `total_time`      | DECIMAL(5, 2)         |        | เวลารวมตั้งแต่เริ่มส่งถึงจุดนี้ (นาที)                        |
+| `status`          | VARCHAR(20)           |        | สถานะจุดส่ง (`pending`, `in_progress`, `delivered`, `failed`) |
+| `delivered_at`    | TIMESTAMP             |        | เวลาที่ไรเดอร์กดส่งสำเร็จ                                     |
 
 ---
 
