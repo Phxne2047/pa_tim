@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Plan/02-ORDER.md",
+                "file": "Plan/05-LEAFLET-GUIDE.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "02-ORDER"
+              "title": "05-LEAFLET-GUIDE"
             }
           }
         ]
@@ -190,6 +190,10 @@
   },
   "active": "d9ffbc8607a5b1bc",
   "lastOpenFiles": [
+    "Plan/04-RIDER.md",
+    "Plan/03-ROUTE-AND-SUMMARY.md",
+    "Plan/02-ORDER.md",
+    "Plan/01-CUSTOMER.md",
     "src/app/pages/order-management/order-management.html",
     "src/app/pages/order-management/order-management.ts",
     "src/app/pages/order-management/order-management.css",

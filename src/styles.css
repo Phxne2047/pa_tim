@@ -2,3 +2,12 @@
 
 @import 'tailwindcss';
 @import "leaflet/dist/leaflet.css";
+
+
+/* ป้องกันปัญหา Leaflet Container ยุบตัวเป็นความสูง 0 */
+.map-container {
+  width: 100%;
+  height: 450px;
+  min-height: 320px;
+  border-radius: 0.75rem;
+}
