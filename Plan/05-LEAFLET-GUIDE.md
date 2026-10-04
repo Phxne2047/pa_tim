@@ -21,10 +21,10 @@ title: คู่มือการใช้งานและการอธิ�
 | ลำดับ | ไฟล์ที่ต้องตรวจสอบ | สิ่งที่ต้องตรวจสอบภายในไฟล์ |
 |:---|:---|:---|
 | 1 | `package.json` | มี `"leaflet": "^1.9.4"` ใน `dependencies` และ `"@types/leaflet": "^1.9.22"` ใน `devDependencies` |
-| 2 | `src/styles.css` | มีบรรทัด `@import "leaflet/dist/leaflet.css";` และการกำหนดความสูงของ container |
+| 2 | `src/styles.css` | มีบรรทัด `@import "leaflet/dist/leaflet.css";` และการกำหนดความสูงของ `.map-container` |
 | 3 | `src/app/pages/customer-management/` | ไฟล์ของหน้าจัดการลูกค้าที่มีการเรียกใช้แผนที่เพื่อปักหมุดและเลือกพิกัด |
 | 4 | `src/app/pages/route-dashboard/` | ไฟล์ของหน้าจัดเส้นทางที่มีการวาด Polyline แยกสีของไรเดอร์แต่ละคน |
-| 5 | `src/environments/environment.ts` | พิกัดจุดศูนย์กลางร้านค้า (ม.มหาสารคาม: Lat `16.245000`, Lng `103.250000`) |
+| 5 | `src/environments/environment.ts` | พิกัดจุดศูนย์กลางร้านค้า (ม.มหาสารคาม: Lat `16.246839`, Lng `103.251963`) |
 
 ---
 
@@ -37,13 +37,6 @@ title: คู่มือการใช้งานและการอธิ�
 # ติดตั้ง Library ทั้งหมดตาม package.json (รวม leaflet และ @types/leaflet)
 npm install
 ```
-
-> [!TIP]
-> ในกรณีที่สร้างโปรเจกต์ใหม่หรือยังไม่มี package ให้รัน:
-> ```bash
-> npm install leaflet
-> npm install --save-dev @types/leaflet
-> ```
 
 ---
 
@@ -88,10 +81,6 @@ graph TD
 <div id="customer-map" class="map-container border border-gray-200 shadow-sm"></div>
 ```
 
-**🔍 อธิบายโค้ด HTML:**
-- `id="customer-map"`: เป็นชื่อ Identifier ที่จะส่งไปให้คำสั่ง `L.map('customer-map')` ในไฟล์ TypeScript ใช้อ้างอิงตำแหน่ง Render
-- `class="map-container"`: ดึงสไตล์ความสูง `height: 450px` ที่เราประกาศไว้ใน `styles.css` มาใช้งาน
-
 ---
 
 ### ขั้นตอนที่ 3.2: เขียนโค้ดในไฟล์ TypeScript (`.ts`)
@@ -99,6 +88,7 @@ graph TD
 ```typescript
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import * as L from 'leaflet';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-customer-management',
@@ -119,8 +109,10 @@ export class CustomerManagement implements AfterViewInit, OnDestroy {
   }
 
   private initMap(): void {
-    // กำหนดพิกัดกึ่งกลางที่ ม.มหาสารคาม (16.245000, 103.250000) Zoom ระดับ 14
-    this.map = L.map('customer-map').setView([16.245000, 103.250000], 14);
+    const shop = environment.shopLocation;
+    
+    // กำหนดพิกัดกึ่งกลางที่ร้านป้าติ๋ม ม.มหาสารคาม (16.246839, 103.251963) Zoom ระดับ 14
+    this.map = L.map('customer-map').setView([shop.latitude, shop.longitude], 14);
 
     // โหลดภาพแผ่นแผนที่ (Tile Layer) จาก OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -130,6 +122,16 @@ export class CustomerManagement implements AfterViewInit, OnDestroy {
 
     // ผูก LayerGroup เข้ากับ Map
     this.markersLayer.addTo(this.map);
+
+    // ปักหมุดร้านค้า
+    const shopIcon = L.divIcon({
+      className: 'custom-shop-pin',
+      html: '<div class="bg-rose-600 text-white font-bold text-xs px-2.5 py-1 rounded-full shadow-lg border-2 border-white flex items-center gap-1">🏠 ร้านป้าติ๋ม</div>',
+      iconSize: [110, 30]
+    });
+    L.marker([shop.latitude, shop.longitude], { icon: shopIcon })
+      .bindPopup(`<b>${shop.name}</b><br>${shop.address}`)
+      .addTo(this.map);
 
     // ดักจับ Event เมื่อคลิกบนแผนที่ เพื่อดึงพิกัด Latitude และ Longitude
     this.map.on('click', (e: L.LeafletMouseEvent) => {
@@ -152,11 +154,11 @@ export class CustomerManagement implements AfterViewInit, OnDestroy {
 
 ### 4.1 การสร้างแผนที่ (`L.map` และ `setView`)
 ```typescript
-this.map = L.map('customer-map').setView([16.245000, 103.250000], 14);
+this.map = L.map('customer-map').setView([16.246839, 103.251963], 14);
 ```
 - **`L.map('customer-map')`**: สั่งให้ Leaflet สร้างแผนที่ลงใน `<div id="customer-map">`
 - **`.setView([lat, lng], zoomLevel)`**:
-  - `[16.245000, 103.250000]`: กำหนดพิกัดกึ่งกลางเริ่มต้น (บริเวณ ม.มหาสารคาม)
+  - `[16.246839, 103.251963]`: กำหนดพิกัดกึ่งกลางเริ่มต้น (บริเวณ ม.มหาสารคาม)
   - `14`: กำหนดระดับการซูม (ตัวเลขยิ่งมาก ยิ่งซูมใกล้เห็นรายละเอียดถนนชัดเจน)
 
 ---
@@ -168,9 +170,9 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19
 }).addTo(this.map);
 ```
-- **`https://{s}.tile.openstreetmap.org/...`**: เป็น URL Server ที่ให้บริการภาพแผนที่ฟรีจาก OpenStreetMap
+- **`https://{s}.tile.openstreetmap.org/...`**: URL Server ที่ให้บริการภาพแผนที่ฟรีจาก OpenStreetMap
 - **`maxZoom: 19`**: ระดับการซูมสูงสุดที่รองรับ
-- **`.addTo(this.map)`**: สั่งให้นำภาพแผนที่ไปแสดงผลบนแผนที่หลัก
+- **`.addTo(this.map)`**: นำภาพแผนที่ไปแสดงผลบนแผนที่หลัก
 
 ---
 
@@ -181,38 +183,13 @@ this.map.on('click', (e: L.LeafletMouseEvent) => {
   const lng = parseFloat(e.latlng.lng.toFixed(6));
   
   // นำค่าไปใส่ใน Model ฟอร์มลูกค้า
-  this.formData.latitude = lat;
-  this.formData.longitude = lng;
+  this.formData.update(f => ({ ...f, latitude: lat, longitude: lng }));
 });
 ```
-- **`e.latlng`**: คือ Object ที่ Leaflet ส่งมาให้เมื่อมีการคลิก ซึ่งเก็บค่า `.lat` และ `.lng` ของจุดที่ผู้ใช้คลิก
-- **`.toFixed(6)`**: ปัดเศษทศนิยมให้อยู่ที่ 6 ตำแหน่ง (มาตรฐานความแม่นยำระดับพิกัด GPS)
 
 ---
 
-### 4.4 การสร้าง Custom Marker ด้วย HTML/Tailwind (`L.divIcon`)
-แก้ปัญหาไอคอนรูปภาพ PNG ค่าเริ่มต้นของ Leaflet โหลดไม่ขึ้น (Icon 404):
-
-```typescript
-// สร้างไอคอนหมุดร้านค้า
-const shopIcon = L.divIcon({
-  className: 'custom-shop-pin',
-  html: '<div class="bg-red-600 text-white font-bold text-xs px-2.5 py-1 rounded-full shadow-lg border-2 border-white">🏠 ร้านข้าวกล่อง</div>',
-  iconSize: [100, 30] // ขนาด กว้าง x สูง (px)
-});
-
-// ปักหมุดลงแผนที่พร้อมข้อความ Popup
-L.marker([16.245000, 103.250000], { icon: shopIcon })
-  .bindPopup('<b>จุดเริ่มต้นจัดส่ง (11:30 น.)</b>')
-  .addTo(this.map);
-```
-- **`L.divIcon()`**: สร้างหมุดจากโค้ด HTML แทนไฟล์รูปภาพ ทำให้เราตกแต่งสีและใส่สไตล์ Tailwind CSS ได้อิสระ
-- **`L.marker([lat, lng], { icon })`**: สร้างวัตถุหมุดที่พิกัดที่กำหนด
-- **`.bindPopup('...')`**: สร้างหน้าต่างกล่องข้อความที่จะเด้งขึ้นมาเมื่อคลิกที่หมุด
-
----
-
-### 4.5 การสร้างหมุดหมายเลขจุดส่งตามสีของไรเดอร์ (ลำดับ 1, 2, 3)
+### 4.4 การสร้างหมุดหมายเลขจุดส่งตามสีของไรเดอร์ (ลำดับ 1, 2, 3)
 ```typescript
 const stopIcon = L.divIcon({
   className: 'custom-stop-pin',
@@ -221,19 +198,17 @@ const stopIcon = L.divIcon({
 });
 
 L.marker([customerLat, customerLng], { icon: stopIcon })
-  .bindPopup(`<b>จุดที่ ${sequence}: คุณ ${customerName}</b><br>📦 จำนวน: ${boxQty} กล่อง`)
+  .bindPopup(`<b>จุดที่ ${sequence}: คุณ ${customerName}</b><br>🍱 จำนวน: ${boxes} กล่อง<br>📞 ${phone}`)
   .addTo(this.markersLayer);
 ```
-- **`${riderColor}`**: กำหนดสีพื้นหลังของหมุดให้ตรงกับสีประจำตัวของไรเดอร์ (เช่น แดง, เขียว, น้ำเงิน)
-- **`${sequence}`**: แสดงหมายเลขลำดับจุดส่ง (1, 2, 3) ภายในหมุด
 
 ---
 
-### 4.6 การวาดเส้นทาง Polyline แยกสีของไรเดอร์แต่ละคน
+### 4.5 การวาดเส้นทาง Polyline แยกสีของไรเดอร์แต่ละคน
 ```typescript
-// points คือ Array ของพิกัด เช่น [[16.245, 103.25], [16.248, 103.252], ...]
+// points คือ Array ของพิกัด เช่น [[16.246839, 103.251963], [16.248231, 103.250125], ...]
 const polyline = L.polyline(points, {
-  color: riderColor, // กำหนดสีเส้นทาง เช่น '#EF4444' (แดง)
+  color: riderColor, // กำหนดสีเส้นทาง เช่น '#EF4444' (แดง), '#10B981' (เขียว)
   weight: 5,         // ความหนาของเส้น (px)
   opacity: 0.85      // ความทึบแสง (0.0 ถึง 1.0)
 }).addTo(this.routesLayer);
@@ -241,45 +216,40 @@ const polyline = L.polyline(points, {
 // ปรับให้แผนที่ Zoom และเลื่อนตำแหน่งให้เห็นครบทุกจุดในเส้นทางพอดี
 this.map?.fitBounds(L.latLngBounds(points), { padding: [30, 30] });
 ```
-- **`L.polyline(points, options)`**: วาดเส้นตรงเชื่อมต่อตามจุดพิกัดใน Array
-- **`map.fitBounds(bounds)`**: สั่งให้แผนที่ปรับขนาดและระดับการซูมอัตโนมัติ เพื่อให้ผู้ใช้มองเห็นเส้นทางทั้งหมดโดยไม่ต้องเลื่อนหาเอง
 
 ---
 
-### 4.7 การวาดวงกลมแสดงรัศมี 1 กม. หรือ 2 กม. (`L.circle`)
+### 4.6 การวาดวงกลมแสดงรัศมี 1.0 กม. หรือ 2.0 กม. (`L.circle`)
 ```typescript
-const circle = L.circle([16.245000, 103.250000], {
-  radius: 1000,        // รัศมีในหน่วยเมตร (1000 เมตร = 1 กิโลเมตร)
+const circle = L.circle([16.246839, 103.251963], {
+  radius: 1000,        // รัศมีในหน่วยเมตร (1000 เมตร = 1.0 กิโลเมตร)
   color: '#2563EB',    // สีของเส้นขอบวงกลม
   fillColor: '#3B82F6',// สีพื้นหลังด้านในวงกลม
   fillOpacity: 0.15    // ความโปร่งใสของพื้นหลัง
 }).addTo(this.map);
 
-// ปรับให้แผนที่ Zoom พอดีกับวงกลมรัศมี
 this.map?.fitBounds(circle.getBounds());
 ```
 
 ---
 
-### 4.8 การล้างข้อมูลเดิมก่อนวาดใหม่ (`LayerGroup.clearLayers`)
+### 4.7 การล้างข้อมูลเดิมก่อนวาดใหม่ (`LayerGroup.clearLayers`)
 ```typescript
 clearOldRoutes(): void {
   // ล้างหมุดและเส้นทางเดิมทั้งหมดที่ผูกอยู่ใน LayerGroup
   this.markersLayer.clearLayers();
 }
 ```
-- **`clearLayers()`**: ลบทุกหมุดและเส้นที่อยู่ใน LayerGroup ออกจากหน้าจอพร้อมกันในคำสั่งเดียว นิยมใช้เมื่อผู้ใช้กด **"คำนวณใหม่"** หรือค้นหาชุดข้อมูลใหม่
 
 ---
 
-### 4.9 การทำลายแผนที่เมื่อออกจากหน้า (`ngOnDestroy`)
+### 4.8 การทำลายแผนที่เมื่อออกจากหน้า (`ngOnDestroy`)
 ```typescript
 ngOnDestroy(): void {
   // ทำลาย Instance ของแผนที่เพื่อป้องกัน Memory Leak
   this.map?.remove();
 }
 ```
-- **`this.map?.remove()`**: คืนหน่วยความจำและลบ Event Listener ทั้งหมดของแผนที่ ป้องกันปัญหาเมื่อสลับหน้าแล้วแผนที่ซ้อนกัน
 
 ---
 

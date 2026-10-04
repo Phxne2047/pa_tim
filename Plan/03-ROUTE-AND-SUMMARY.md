@@ -11,7 +11,7 @@ title: คู่มือปฏิบัติงานฉบับละเอ�
 
 # 🗺️ คู่มือปฏิบัติงานฉบับละเอียด: สมาชิกคนที่ 3
 > [!INFO] **ส่วนงานที่รับผิดชอบ:** ระบบจัดเส้นทางและแบ่งงานไรเดอร์อัจฉริยะ (VRP) & แดชบอร์ดการเงิน Real-time  
-> **เอกสารอ้างอิงหลัก:** [[PROJECT_PLAN|แผนแม่บท PaTim]] | **คู่มือแผนที่:** [[05-LEAFLET-GUIDE|คู่มือ Leaflet Map]]
+> **เอกสารอ้างอิงหลัก:** [[PROJECT_PLAN|แผนแม่บท PaTim]] | **โครงสร้าง DB:** [[DATABASE_SCHEMA|ผัง ER Diagram]] | **API:** [[API_DOCUMENTATION|เอกสาร API]]
 
 ---
 
@@ -19,29 +19,31 @@ title: คู่มือปฏิบัติงานฉบับละเอ�
 
 ### 1.1 หน้าที่ของสมาชิกคนที่ 3 ในทีม
 คุณมีหน้าที่รับผิดชอบ **หัวใจสำคัญที่สุดของโปรเจกต์** คือการสร้างระบบคิดแทนเจ้าของร้าน โดยนำรายการออเดอร์ทั้งหมดที่สมาชิกคนที่ 2 เตรียมไว้ มาทำการ **จัดกลุ่มแบ่งงานให้ไรเดอร์แต่ละคน (Dispatching) และคำนวณเส้นทางวิ่งที่สั้นที่สุด (Route Optimization)** ภายใต้เงื่อนไขเหล็ก:
-1. มอเตอร์ไซค์ 1 คัน ขนข้าวกล่องได้ **ไม่เกิน 10 กล่อง**
-2. ไรเดอร์ 1 คน รับงานได้ **ไม่เกิน 3 ออเดอร์ (3 จุดส่ง)** ต่อรอบ
-3. เวลาออกเดินทางคือ **11:30 น.** และต้องส่งถึงจุดสุดท้าย **ไม่เกิน 12:30 น. (ภายในเวลา 60 นาที)** โดยคำนวณจากความเร็วเฉลี่ย 30 กม./ชม.
-4. **แสดงเส้นทางวิ่งแยกตามสีบนแผนที่ Leaflet ขนาดใหญ่** เพื่อให้เจ้าของร้านตรวจเช็กภาพรวมได้ง่าย
-5. **คำนวณและสรุปตัวเลขทางการเงินแบบ Real-time:** รายรับ, ต้นทุนอาหาร, ค่าขนส่งไรเดอร์, และ **กำไร/ขาดทุนสุทธิ**
+1. มอเตอร์ไซค์ 1 คัน ขนข้าวกล่องได้ **ไม่เกิน 10 กล่อง** (`total_boxes <= 10`)
+2. ไรเดอร์ 1 คน รับงานได้ **ไม่เกิน 3 ออเดอร์ (3 จุดส่ง)** ต่อรอบ (`total_orders <= 3`)
+3. เวลาออกเดินทางคือ **11:30 น.** และต้องส่งถึงจุดสุดท้าย **ไม่เกิน 12:30 น. (ภายในเวลา 60 นาที)** (`time_delivery <= 60`) โดยคำนวณจากความเร็วเฉลี่ย 30 กม./ชม. (1 กม. $\approx$ 2 นาที)
+4. **แสดงเส้นทางวิ่งแยกตามสีบนแผนที่ Leaflet ขนาดใหญ่** เพื่อให้เจ้าของร้านตรวจเช็กภาพรวมได้ง่าย (อ้างอิงฟิลด์ `color` ในตาราง `riders`)
+5. **คำนวณและสรุปตัวเลขทางการเงินแบบ Real-time:**
+   - $\text{delivery\_price} = 15 + (\text{total\_distance} \times 2 \times \text{total\_boxes})$
+   - $\text{net\_profit} = (\text{total\_boxes} \times 25) - \text{delivery\_price}$
 
 ### 1.2 หน้าตาหน้าจอที่ต้องพัฒนา (UI Layout & Components)
 1. **แถบ Action Header ด้านบน:**
    - ⚡ ปุ่ม **"คำนวณจัดเส้นทางอัตโนมัติ"** (กดครั้งเดียวเวลา 11:30 น. ระบบแบ่งงานทันที)
    - 🔄 ปุ่ม **"คำนวณใหม่ (ทางเลือกอื่น)"** (สร้างทางเลือกเส้นทางแบบอื่นให้เจ้าของร้านเปรียบเทียบ)
+   - 💾 ปุ่ม **"บันทึกและส่งใบงานให้ไรเดอร์"** (`POST /delivery-routes`)
 2. **แผง Real-time Financial Dashboard (KPI Cards 4 ใบ):**
    - 💰 **รายรับรวม:** $\text{จำนวนกล่องรวม} \times 65$ บาท
    - 🥩 **ต้นทุนอาหารรวม:** $\text{จำนวนกล่องรวม} \times 40$ บาท (กำไรขั้นต้น $= \text{กล่อง} \times 25$)
-   - 🛵 **ค่าขนส่งไรเดอร์รวม:** ผลรวมของ $15 + (\text{ระยะทางรวม} \times 2 \times \text{กล่องรวม})$
-   - 🟢 **กล่องใหญ่เน้นพิเศษ "กำไรสุทธิของร้าน":** $\text{กำไรขั้นต้น} - \text{ค่าขนส่งรวม}$ พร้อมบอกจำนวนไรเดอร์ที่ต้องใช้ในรอบนั้น
+   - 🛵 **ค่าขนส่งรวม (delivery_price):** ผลรวมค่าจ้างไรเดอร์ทั้งหมด
+   - 🟢 **กล่องใหญ่เน้นพิเศษ "กำไรสุทธิ (net_profit)":** กำไรขั้นต้นหักค่าขนส่ง พร้อมบอกจำนวนไรเดอร์ที่ต้องใช้
 3. **โซนแผนที่ขนาดใหญ่ (Leaflet Multi-Rider Map):**
-   - แผนที่ขนาดใหญ่แสดงเส้นทาง Polyline ของไรเดอร์แต่ละคนด้วย **สีที่แตกต่างกัน** (แดง, เขียว, น้ำเงิน, ส้ม, ม่วง)
-   - หมุดร้านค้าสีแดง 🏠 ตรงกลาง (ม.มหาสารคาม)
-   - หมุดจุดส่งของลูกค้ามีตัวเลขบอกลำดับการวิ่งส่ง **1, 2, 3** และมีสีตรงกับเส้นทางของไรเดอร์คนนั้น
-   - กล่อง Legend ด้านบนอธิบายว่า สีไหนคือไรเดอร์คนที่เท่าไหร่ ขนกี่กล่อง และใช้เวลากี่นาที
+   - แผนที่ขนาดใหญ่แสดงเส้นทาง Polyline ของไรเดอร์แต่ละคนด้วย **สีประจำตัว** (`riders.color`)
+   - หมุดร้านค้าสีแดง 🏠 ตรงกลาง (ม.มหาสารคาม: `Lat 16.246839, Lng 103.251963`)
+   - หมุดจุดส่งของลูกค้ามีตัวเลขบอกลำดับการวิ่งส่ง **1, 2, 3** (`stop_number`) และมีสีตรงกับเส้นทางของไรเดอร์คนนั้น
 4. **โซนตารางสรุปการแบ่งงานไรเดอร์ (Rider Job Batches):**
-   - การ์ดสรุปงานของไรเดอร์แต่ละคน (เช่น ไรเดอร์คนที่ 1: Job ID `JOB-MSU-01`, ขน 6 กล่อง, ระยะทาง 2.4 กม., เวลา 18 นาที, ค่าส่ง ฿43.80, กำไร ฿106.20)
-   - แสดงลำดับการวิ่งส่งแบบ Step-by-Step: `🏠 ร้านค้า -> 📍 จุด 1 (คุณ A) -> 📍 จุด 2 (คุณ B) -> กลับร้าน`
+   - การ์ดสรุปงานของไรเดอร์แต่ละคน (เช่น ไรเดอร์คนที่ 1: Job Code `JOB-MSU-01`, ขน 8 กล่อง, ระยะทาง 3.8 กม., เวลา 28 นาที, ค่าส่ง ฿45.40, กำไร ฿154.60)
+   - แสดงลำดับการวิ่งส่งแบบ Step-by-Step: `🏠 ร้านค้า -> 📍 จุด 1 (คุณ A) -> 📍 จุด 2 (คุณ B) -> 📍 จุด 3 (คุณ C)`
 
 ---
 
@@ -60,52 +62,67 @@ git switch -c feature/route-optimization
 ```typescript
 import { Order } from './order.model';
 
-export interface RouteStop {
-  sequence: number; // 1, 2, 3
-  orderId: string;
-  customerName: string;
+export interface Rider {
+  id: string;              // เช่น 'RD-01'
+  name: string;            // เช่น 'คุณสมชาย ใจดี'
   phone: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  boxQuantity: number;
-  distanceFromPrevKm: number;
-  estimatedMinutes: number;
+  color: string;           // เช่น '#EF4444'
 }
 
-export interface RiderRoute {
-  jobCode: string; // เช่น JOB-MSU-01
-  riderId: string;
-  riderName: string;
-  routeColor: string; // เช่น #EF4444, #10B981, #3B82F6, #F59E0B, #8B5CF6
-  orders: Order[];
-  stops: RouteStop[];
-  totalBoxes: number; // ต้อง <= 10 กล่อง
-  totalStops: number; // ต้อง <= 3 จุด
-  totalDistanceKm: number;
-  estimatedMinutes: number; // ต้อง <= 60 นาที
-  deliveryFee: number;
-  revenue: number;
-  foodCost: number;
-  grossProfit: number;
-  netProfit: number;
-  isValid: boolean;
-  warningMessage?: string;
+export interface RouteStop {
+  id: string;              // เช่น 'STOP-001'
+  route_id?: string;       // เช่น 'ROUTE-01'
+  order_id: string;        // เช่น 'ORD-001'
+  stop_number: number;     // 1, 2, 3
+  distance_before: number; // ระยะทางจากจุดก่อนหน้า (กม.)
+  total_time: number;      // เวลารวมตั้งแต่เริ่มถึงจุดนี้ (นาที)
+  status: string;          // 'pending' | 'in_progress' | 'delivered' | 'failed'
+  delivered_at?: string;
+  
+  // ข้อมูลเสริมสำหรับแสดงผล UI
+  customer_name?: string;
+  phone?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  boxes?: number;
+}
+
+export interface DeliveryRoute {
+  id: string;              // เช่น 'ROUTE-01'
+  rider_id: string;        // เช่น 'RD-01'
+  job_code: string;        // เช่น 'JOB-MSU-01'
+  total_orders: number;    // ต้อง <= 3
+  total_boxes: number;     // ต้อง <= 10
+  total_distance: number;  // ระยะทางรวม (กม.)
+  time_delivery: number;   // เวลารวม (นาที) ต้อง <= 60
+  delivery_price: number;  // 15 + (total_distance * 2 * total_boxes)
+  net_profit: number;      // (total_boxes * 25) - delivery_price
+  status: string;          // 'assigned' | 'in_progress' | 'completed'
+  
+  // ข้อมูลเสริมสำหรับแสดงผล
+  rider_name?: string;
+  rider_phone?: string;
+  rider_color?: string;
+  stops?: RouteStop[];
+  orders?: Order[];
+  is_valid?: boolean;
+  warning_message?: string;
 }
 
 export interface DispatchSummary {
-  dispatchTime: string; // 11:30 น.
-  targetDeadline: string; // 12:30 น.
-  totalRiders: number;
-  totalOrders: number;
-  totalBoxes: number;
-  totalDistanceKm: number;
-  totalDeliveryFee: number;
-  totalRevenue: number;
-  totalFoodCost: number;
-  totalGrossProfit: number;
-  totalNetProfit: number;
-  routes: RiderRoute[];
+  dispatch_time: string;   // '11:30 น.'
+  deadline_time: string;   // '12:30 น.'
+  total_riders: number;
+  total_orders: number;
+  total_boxes: number;
+  total_distance: number;
+  total_delivery_price: number;
+  total_revenue: number;
+  total_food_cost: number;
+  total_gross_profit: number;
+  total_net_profit: number;
+  routes: DeliveryRoute[];
 }
 ```
 
@@ -115,13 +132,14 @@ export interface DispatchSummary {
 รันคำสั่ง:
 ```bash
 ng g s services/route-calculator --skip-tests
+ng g s services/delivery-route --skip-tests
 ```
 
 แก้ไขโค้ดในไฟล์ `src/app/services/route-calculator.service.ts`:
 ```typescript
 import { Injectable } from '@angular/core';
 import { Order } from '../models/order.model';
-import { RiderRoute, RouteStop, DispatchSummary } from '../models/route.model';
+import { DeliveryRoute, RouteStop, DispatchSummary } from '../models/route.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -130,7 +148,6 @@ import { environment } from '../../environments/environment';
 export class RouteCalculatorService {
   private riderColors = ['#EF4444', '#10B981', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4'];
 
-  // สูตรคำนวณระยะทาง Haversine (กิโลเมตร)
   calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -142,23 +159,25 @@ export class RouteCalculatorService {
     return parseFloat((R * c).toFixed(3));
   }
 
-  // อัลกอริทึมจัดเส้นทาง (VRP Clustering & Nearest Neighbor)
   optimizeRoutes(orders: Order[], randomizeSeed: boolean = false): DispatchSummary {
     const shop = environment.shopLocation;
-    const pendingOrders = [...orders.filter(o => o.customer && o.status !== 'delivered')];
+    const pendingOrders = [...orders.filter(o => o.status !== 'delivered')];
 
     if (randomizeSeed) {
       pendingOrders.sort(() => Math.random() - 0.5);
     } else {
-      // เรียงลำดับจากจุดที่ใกล้ร้านเพื่อจับกลุ่มโซน
       pendingOrders.sort((a, b) => {
-        const distA = this.calculateDistanceKm(shop.latitude, shop.longitude, a.customer!.latitude, a.customer!.longitude);
-        const distB = this.calculateDistanceKm(shop.latitude, shop.longitude, b.customer!.latitude, b.customer!.longitude);
+        const latA = a.customer_latitude ?? shop.latitude;
+        const lngA = a.customer_longitude ?? shop.longitude;
+        const latB = b.customer_latitude ?? shop.latitude;
+        const lngB = b.customer_longitude ?? shop.longitude;
+        const distA = this.calculateDistanceKm(shop.latitude, shop.longitude, latA, lngA);
+        const distB = this.calculateDistanceKm(shop.latitude, shop.longitude, latB, lngB);
         return distA - distB;
       });
     }
 
-    const routes: RiderRoute[] = [];
+    const routes: DeliveryRoute[] = [];
     let riderIndex = 1;
 
     while (pendingOrders.length > 0) {
@@ -168,9 +187,9 @@ export class RouteCalculatorService {
       // กฎข้อบังคับ: ไม่เกิน 10 กล่อง และ ไม่เกิน 3 ออเดอร์
       for (let i = 0; i < pendingOrders.length; i++) {
         const order = pendingOrders[i];
-        if (currentOrders.length < 3 && currentBoxes + order.boxQuantity <= 10) {
+        if (currentOrders.length < 3 && currentBoxes + order.boxes <= 10) {
           currentOrders.push(order);
-          currentBoxes += order.boxQuantity;
+          currentBoxes += order.boxes;
           pendingOrders.splice(i, 1);
           i--;
         }
@@ -181,6 +200,7 @@ export class RouteCalculatorService {
       let currentLat = shop.latitude;
       let currentLng = shop.longitude;
       let totalDist = 0;
+      let accumulatedTime = 0;
       const unvisited = [...currentOrders];
       let seq = 1;
 
@@ -189,7 +209,9 @@ export class RouteCalculatorService {
         let minDist = Infinity;
 
         for (let j = 0; j < unvisited.length; j++) {
-          const d = this.calculateDistanceKm(currentLat, currentLng, unvisited[j].customer!.latitude, unvisited[j].customer!.longitude);
+          const lat = unvisited[j].customer_latitude ?? shop.latitude;
+          const lng = unvisited[j].customer_longitude ?? shop.longitude;
+          const d = this.calculateDistanceKm(currentLat, currentLng, lat, lng);
           if (d < minDist) {
             minDist = d;
             nearestIdx = j;
@@ -198,69 +220,73 @@ export class RouteCalculatorService {
 
         const nextOrder = unvisited.splice(nearestIdx, 1)[0];
         totalDist += minDist;
-        const estMinutes = parseFloat(((minDist / 30) * 60).toFixed(1));
+        const legMinutes = parseFloat(((minDist / 30) * 60).toFixed(1)); // 30 km/h
+        accumulatedTime += legMinutes;
+
+        const lat = nextOrder.customer_latitude ?? shop.latitude;
+        const lng = nextOrder.customer_longitude ?? shop.longitude;
 
         stops.push({
-          sequence: seq++,
-          orderId: nextOrder.id,
-          customerName: `${nextOrder.customer!.firstName} ${nextOrder.customer!.lastName}`,
-          phone: nextOrder.customer!.phone,
-          address: nextOrder.customer!.address,
-          latitude: nextOrder.customer!.latitude,
-          longitude: nextOrder.customer!.longitude,
-          boxQuantity: nextOrder.boxQuantity,
-          distanceFromPrevKm: minDist,
-          estimatedMinutes: estMinutes
+          id: `STOP-${String(riderIndex).padStart(2, '0')}-${seq}`,
+          route_id: `ROUTE-${String(riderIndex).padStart(2, '0')}`,
+          order_id: nextOrder.id,
+          stop_number: seq,
+          distance_before: parseFloat(minDist.toFixed(2)),
+          total_time: parseFloat(accumulatedTime.toFixed(1)),
+          status: 'pending',
+          customer_name: nextOrder.customer_name || 'ลูกค้า',
+          phone: nextOrder.customer_phone || '-',
+          address: nextOrder.customer_address || '-',
+          latitude: lat,
+          longitude: lng,
+          boxes: nextOrder.boxes
         });
 
-        currentLat = nextOrder.customer!.latitude;
-        currentLng = nextOrder.customer!.longitude;
+        seq++;
+        currentLat = lat;
+        currentLng = lng;
       }
 
-      // คำนวณเวลาและการเงิน
       const totalEstimatedMinutes = parseFloat(((totalDist / 30) * 60).toFixed(1));
-      const deliveryFee = parseFloat((15 + totalDist * 2 * currentBoxes).toFixed(2));
-      const revenue = currentBoxes * 65;
-      const foodCost = currentBoxes * 40;
-      const grossProfit = currentBoxes * 25;
-      const netProfit = parseFloat((grossProfit - deliveryFee).toFixed(2));
+      const deliveryPrice = parseFloat((15 + totalDist * 2 * currentBoxes).toFixed(2));
+      const netProfit = parseFloat((currentBoxes * 25 - deliveryPrice).toFixed(2));
       const isValid = totalEstimatedMinutes <= 60 && currentBoxes <= 10 && stops.length <= 3;
 
       routes.push({
-        jobCode: `JOB-MSU-${String(riderIndex).padStart(2, '0')}`,
-        riderId: `RIDER-${riderIndex}`,
-        riderName: `ไรเดอร์คนที่ ${riderIndex}`,
-        routeColor: this.riderColors[(riderIndex - 1) % this.riderColors.length],
-        orders: currentOrders,
+        id: `ROUTE-${String(riderIndex).padStart(2, '0')}`,
+        rider_id: `RD-${String(riderIndex).padStart(2, '0')}`,
+        job_code: `JOB-MSU-${String(riderIndex).padStart(2, '0')}`,
+        total_orders: stops.length,
+        total_boxes: currentBoxes,
+        total_distance: parseFloat(totalDist.toFixed(2)),
+        time_delivery: totalEstimatedMinutes,
+        delivery_price: deliveryPrice,
+        net_profit: netProfit,
+        status: 'assigned',
+        rider_name: `คุณไรเดอร์คนที่ ${riderIndex}`,
+        rider_phone: `089-000-000${riderIndex}`,
+        rider_color: this.riderColors[(riderIndex - 1) % this.riderColors.length],
         stops,
-        totalBoxes: currentBoxes,
-        totalStops: stops.length,
-        totalDistanceKm: parseFloat(totalDist.toFixed(2)),
-        estimatedMinutes: totalEstimatedMinutes,
-        deliveryFee,
-        revenue,
-        foodCost,
-        grossProfit,
-        netProfit,
-        isValid,
-        warningMessage: totalEstimatedMinutes > 60 ? '⚠️ เวลาจัดส่งเกิน 60 นาที (เสี่ยงโดนปรับ 20 บ./ออเดอร์)' : undefined
+        orders: currentOrders,
+        is_valid: isValid,
+        warning_message: totalEstimatedMinutes > 60 ? '⚠️ เวลาจัดส่งเกิน 60 นาที' : undefined
       });
 
       riderIndex++;
     }
 
     return {
-      dispatchTime: '11:30 น.',
-      targetDeadline: '12:30 น.',
-      totalRiders: routes.length,
-      totalOrders: routes.reduce((sum, r) => sum + r.totalStops, 0),
-      totalBoxes: routes.reduce((sum, r) => sum + r.totalBoxes, 0),
-      totalDistanceKm: parseFloat(routes.reduce((sum, r) => sum + r.totalDistanceKm, 0).toFixed(2)),
-      totalDeliveryFee: parseFloat(routes.reduce((sum, r) => sum + r.deliveryFee, 0).toFixed(2)),
-      totalRevenue: routes.reduce((sum, r) => sum + r.revenue, 0),
-      totalFoodCost: routes.reduce((sum, r) => sum + r.foodCost, 0),
-      totalGrossProfit: routes.reduce((sum, r) => sum + r.grossProfit, 0),
-      totalNetProfit: parseFloat(routes.reduce((sum, r) => sum + r.netProfit, 0).toFixed(2)),
+      dispatch_time: '11:30 น.',
+      deadline_time: '12:30 น.',
+      total_riders: routes.length,
+      total_orders: routes.reduce((sum, r) => sum + r.total_orders, 0),
+      total_boxes: routes.reduce((sum, r) => sum + r.total_boxes, 0),
+      total_distance: parseFloat(routes.reduce((sum, r) => sum + r.total_distance, 0).toFixed(2)),
+      total_delivery_price: parseFloat(routes.reduce((sum, r) => sum + r.delivery_price, 0).toFixed(2)),
+      total_revenue: routes.reduce((sum, r) => sum + r.total_boxes * 65, 0),
+      total_food_cost: routes.reduce((sum, r) => sum + r.total_boxes * 40, 0),
+      total_gross_profit: routes.reduce((sum, r) => sum + r.total_boxes * 25, 0),
+      total_net_profit: parseFloat(routes.reduce((sum, r) => sum + r.net_profit, 0).toFixed(2)),
       routes
     };
   }
@@ -269,57 +295,11 @@ export class RouteCalculatorService {
 
 ---
 
-### ขั้นตอนที่ 2.4: สร้าง Page Component (`route-dashboard`)
-รันคำสั่ง:
-```bash
-ng g c pages/route-dashboard --skip-tests
-```
+## 🌐 3. ข้อกำหนดการเรียกใช้งาน API (`DeliveryRouteService -> Backend`)
 
-#### การเขียน Logic ใน `route-dashboard.ts`:
-1. สร้างแผนที่ Leaflet ใน `ngAfterViewInit()`
-2. เมื่อกดปุ่ม "คำนวณจัดเส้นทางอัตโนมัติ" ให้ดึงออเดอร์จาก `OrderService` มาส่งเข้า `routeCalculator.optimizeRoutes()`
-3. การวาดเส้นทางแยกสีบนแผนที่:
-   - สั่ง `routesLayer.clearLayers()` เพื่อล้างเส้นทางเดิม
-   - วนลูป `routes` ของไรเดอร์แต่ละคน แล้วสร้าง `L.polyline(coordinates, { color: r.routeColor, weight: 5 })`
-   - วาดหมุดจุดส่งพร้อมหมายเลข 1, 2, 3 ด้วย `L.divIcon` สีเดียวกับไรเดอร์
-   - สั่ง `map.fitBounds()` เพื่อปรับมุมมองอัตโนมัติ
-
----
-
-## ⚠️ 3. สิ่งสำคัญและข้อกำหนดทางธุรกิจที่ห้ามพลาด (Must-Know & Constraints)
-
-> [!WARNING] **กฎเหล็ก 4 ข้อที่ระบบจัดเส้นทางต้องควบคุมอย่างเด็ดขาด**
-> 1. **ความจุสูงสุด:** ห้ามจัดเกิน **10 กล่อง** ต่อรถมอเตอร์ไซค์ 1 คัน
-> 2. **จำนวนจุดส่ง:** ห้ามจัดเกิน **3 ออเดอร์ (3 จุดส่ง)** ต่อไรเดอร์ 1 คน
-> 3. **เวลาจัดส่ง:** ต้องส่งเสร็จภายใน **60 นาที (ถึงก่อน 12:30 น.)** โดยคำนวณจากความเร็ว 30 กม./ชม.
-> 4. **ความถูกต้องของสูตรการเงิน:**
->    - $\text{ค่าขนส่ง} = 15 + (\text{ระยะทางรวม} \times 2 \times \text{กล่องรวม})$
->    - $\text{กำไรสุทธิ} = (\text{กล่องรวม} \times 25) - \text{ค่าขนส่ง}$
-
----
-
-## 🌐 4. ข้อกำหนดการเรียกใช้งาน API (`DeliveryRouteService -> Backend`)
-
-> [!NOTE] **รูปแบบการเชื่อมต่อ:** ติดต่อสื่อสารกับ Backend ผ่าน RESTful API (`HttpClient`) ไม่ต้องจัดการ Database โดยตรง
-
-### สรุป Endpoint สำหรับระบบจัดเส้นทาง:
-| Method | Endpoint | หน้าที่การทำงาน | Request Body | Response Body ตัวอย่าง |
-|:---|:---|:---|:---|:---|
-| `GET` | `/api/orders?status=pending` | ดึงออเดอร์ที่รอดำเนินการจัดส่งสำหรับนำมาคำนวณเส้นทาง | - | `[{ id, orderCode, boxQuantity, customer, ... }]` |
-| `POST` | `/api/delivery-batches` | บันทึกผลการจัดเส้นทางและสร้างใบงานไรเดอร์ (`JOB-MSU-xx`) | `{ batchDate: "...", routes: [...] }` | `{ success: true, totalBatches: 3, batches: [...] }` (Status: 201 Created) |
-| `GET` | `/api/delivery-batches` | ดึงข้อมูลรอบจัดส่งและสถิติการเงินประจำวัน | `?date=YYYY-MM-DD` | `{ totalBoxes, totalRevenue, totalDeliveryFee, totalNetProfit, routes: [...] }` |
-
----
-
-## 🧪 5. รายการทดสอบและเกณฑ์การตรวจรับงาน (Testing & Checklist)
-
-| ลำดับ | สิ่งที่ต้องทดสอบ | ผลลัพธ์ที่คาดหวัง |
-|:---|:---|:---|
-| 1 | กดปุ่มจัดเส้นทาง | ระบบรวบรวมออเดอร์ทั้งหมดและแบ่งงานให้ไรเดอร์อัตโนมัติทันที |
-| 2 | ตรวจสอบขีดจำกัดกล่อง | ไรเดอร์ทุกคนได้รับงานรวมไม่เกิน 10 กล่อง |
-| 3 | ตรวจสอบจุดส่ง | ไรเดอร์ทุกคนมีจุดส่งไม่เกิน 3 จุด |
-| 4 | ตรวจสอบเวลาเดินทาง | ทุกเส้นทางใช้เวลาไม่เกิน 60 นาที (หากเกินต้องมีข้อความเตือนสีแดง) |
-| 5 | แผนที่ Leaflet | แสดงเส้นทาง Polyline แยกสีของไรเดอร์แต่ละคนชัดเจน และมีหมุดหมายเลข 1, 2, 3 |
-| 6 | ปุ่มคำนวณใหม่ | กดปุ่มแล้ว แผนที่ล้างเส้นทางเก่าและวาดเส้นทางทางเลือกใหม่ทันที |
-| 7 | แดชบอร์ดการเงิน | สรุปรายรับ, ต้นทุนอาหาร, ค่าส่ง และกำไรสุทธิถูกต้องตรงตามสูตร |
-| 8 | Git & Build | รัน `npm run build` ผ่าน 100% ไม่มีข้อผิดพลาด ก่อนเปิด PR เข้า `develop` |
+| Method | Endpoint | หน้าที่การทำงาน | Request Body |
+|:---|:---|:---|:---|
+| `GET` | `/orders` | ดึงรายการออเดอร์ทั้งหมดเพื่อนำมากรอง `status=pending` คำนวณเส้นทาง | - |
+| `GET` | `/riders` | ดึงรายชื่อไรเดอร์และรหัสสี | - |
+| `POST` | `/delivery-routes` | บันทึกผลการจัดเส้นทางและสร้างใบงานไรเดอร์ | `{ routes: [...] }` |
+| `GET` | `/delivery-routes` | ดึงข้อมูลสายส่งทั้งหมดและสรุปยอด | - |
