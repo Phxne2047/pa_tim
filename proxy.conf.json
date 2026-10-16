@@ -1,0 +1,10 @@
+{
+  "/api": {
+    "target": "https://backend-pa-tim.vercel.app",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

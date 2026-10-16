@@ -1,0 +1,148 @@
+<div class="mx-auto max-w-xl space-y-4 p-4">
+  <div class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="rounded-lg bg-orange-100 px-2.5 py-1 text-xs font-bold text-orange-600">
+          RIDER MOBILE VIEW
+        </span>
+        <span class="text-xs font-medium text-slate-400">สำหรับเปิดดูบนมือถือ</span>
+      </div>
+      <div
+        class="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+        <span class="size-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        ระบบออนไลน์
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <input type="text" [(ngModel)]="searchQuery" (input)="searchQuery = searchQuery.toUpperCase()"
+          (keyup.enter)="onSearchRider()" placeholder="JOB-01" class="w-full rounded-2xl ..." />
+      </div>
+      <button (click)="onSearchRider()"
+        class="rounded-2xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-md shadow-orange-500/30 transition-all hover:bg-orange-600 active:scale-95">
+        ค้นหา
+      </button>
+    </div>
+
+    @if (notFoundError) {
+    <div
+      class="flex items-center gap-2.5 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-xs font-medium text-red-600">
+      <span class="text-sm">⚠️</span>
+      <span>ไม่พบใบงานหรือรหัสไรเดอร์ '{{ searchQuery }}' กรุณาตรวจสอบอีกครั้ง</span>
+    </div>
+    }
+
+    <div class="space-y-1.5 pt-1">
+      <p class="text-xs font-semibold text-slate-400">เลือกกรอบงานด่วน:</p>
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        @for (rider of riderList; track rider.code) {
+        <button (click)="selectRider(rider.code)" [class]="selectedRiderCode === rider.code 
+              ? 'bg-slate-900 text-white ring-2 ring-orange-500 ring-offset-1' 
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+          class="flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all">
+          <span [class]="rider.colorClass" class="size-2 rounded-full"></span>
+          <span>{{ rider.code }} ({{ rider.name }})</span>
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (currentRiderInfo && !notFoundError) {
+  <div
+    class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-600 via-rose-700 to-slate-900 p-5 text-white shadow-lg space-y-4">
+    <div class="flex items-start justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">🛵</span>
+        <div>
+          <h2 class="text-lg font-bold leading-tight">{{ currentRiderInfo.fullName }}</h2>
+          <p class="text-xs text-rose-200/80">{{ currentRiderInfo.jobId }} • {{ currentRiderInfo.vehicle }}</p>
+        </div>
+      </div>
+      <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-rose-100 backdrop-blur-md">
+        {{ currentRiderInfo.shift }}
+      </span>
+    </div>
+
+    <div class="rounded-2xl bg-white/10 p-4 text-center backdrop-blur-md border border-white/10 space-y-1">
+      <p class="text-xs font-medium text-rose-100">📦 รอบนี้ต้องหยิบข้าวกล่องไปทั้งหมด</p>
+      <p class="text-4xl font-extrabold text-amber-300">{{ totalBoxes }} <span
+          class="text-base font-normal text-white">กล่อง</span></p>
+      <p class="text-xs text-rose-200">🛵 ส่งทั้งหมด {{ totalStops }} จุด • ระยะทางรวม {{ currentRiderInfo.totalDistance
+        }} กม.</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="rounded-2xl bg-black/20 p-3 text-center border border-white/5">
+        <p class="text-[11px] text-rose-200">กำหนดส่งถึงก่อน</p>
+        <p class="text-sm font-bold text-white mt-0.5">{{ currentRiderInfo.deadline }} <span
+            class="text-emerald-400 font-normal">({{ currentRiderInfo.estimatedFinish }})</span></p>
+      </div>
+      <div class="rounded-2xl bg-black/20 p-3 text-center border border-white/5">
+        <p class="text-[11px] text-rose-200">ค่ารอบที่ได้รับ</p>
+        <p class="text-sm font-bold text-amber-400 mt-0.5">฿{{ currentRiderInfo.earnings }} บาท</p>
+      </div>
+    </div>
+  </div>
+
+  <button (click)="openGoogleMaps()"
+    class="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition-all hover:bg-blue-700 active:scale-95 border-0 cursor-pointer">
+    <span>🗺️</span>
+    <span>เปิดเส้นทางนำทางทุกจุดใน Google Maps</span>
+  </button>
+
+  <div class="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm space-y-3">
+    <h3 class="flex items-center gap-2 text-sm font-bold text-slate-800">
+      <span>🗺️</span> แผนที่เส้นทางส่งสินค้า
+    </h3>
+    <div id="riderMap" class="h-64 w-full rounded-2xl border border-slate-200"></div>
+  </div>
+
+  <div class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm space-y-4">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+      <h3 class="flex items-center gap-2 text-sm font-bold text-slate-800">
+        <span>📍</span> ลำดับการขับไปส่ง (Step-by-Step)
+      </h3>
+      <span class="text-xs font-medium text-slate-400">รายการจุดส่ง</span>
+    </div>
+
+    <div class="space-y-3">
+      @for (item of deliveryList; track item.id; let idx = $index) {
+      <div class="relative pl-6 border-l-2" [class]="item.type === 'pickup' ? 'border-amber-500' : 'border-blue-500'">
+        <span class="absolute -left-[9px] top-0 grid size-4 place-items-center rounded-full text-[10px]"
+          [class]="item.type === 'pickup' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'">
+          {{ idx }}
+        </span>
+        <div class="rounded-2xl p-3.5 border space-y-1.5"
+          [class]="item.type === 'pickup' ? 'bg-amber-50/80 border-amber-200' : 'bg-slate-50 border-slate-200'">
+          <div class="flex items-center justify-between">
+            <span class="rounded-md px-2 py-0.5 text-[11px] font-bold"
+              [class]="item.type === 'pickup' ? 'bg-amber-200 text-amber-800' : 'bg-blue-100 text-blue-800'">
+              {{ item.type === 'pickup' ? 'จุดที่ 0: จุดรับอาหาร' : item.title }}
+            </span>
+            <button (click)="toggleStatus(item)"
+              class="rounded-lg px-2.5 py-1 text-xs font-bold border-0 cursor-pointer transition-all"
+              [class]="item.status === 'completed' ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-700'">
+              {{ item.status === 'completed' ? '✓ เสร็จสิ้น' : 'รอดำเนินการ' }}
+            </button>
+          </div>
+          <h4 class="text-xs font-bold text-slate-800">{{ item.type === 'pickup' ? item.title : item.customerName }}
+          </h4>
+          <p class="text-[11px] text-slate-500">📍 {{ item.address }}</p>
+          @if (item.phone) {
+          <p class="text-[11px] text-slate-500">📞 {{ item.phone }}</p>
+          }
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[11px] text-slate-600 font-medium">{{ item.items }}</span>
+            <span class="inline-block rounded-lg bg-amber-200/80 px-2 py-0.5 text-xs font-bold text-amber-900">
+              {{ item.boxes }} กล่อง
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+  }
+</div>

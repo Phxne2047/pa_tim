@@ -1,59 +1,59 @@
 # PaTim
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.5.
+โปรเจกต์นี้สร้างขึ้นด้วย [Angular CLI](https://github.com/angular/angular-cli) เวอร์ชัน 22.0.5
 
-## Development server
+## เซิร์ฟเวอร์สำหรับพัฒนา
 
-To start a local development server, run:
+เริ่มต้นเซิร์ฟเวอร์ภายในเครื่องด้วยคำสั่ง:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+เมื่อเซิร์ฟเวอร์เริ่มทำงานแล้ว ให้เปิดเบราว์เซอร์ไปที่ `http://localhost:4200/` ระบบจะรีโหลดแอปพลิเคชันให้อัตโนมัติเมื่อมีการแก้ไขไฟล์ต้นฉบับ
 
-## Code scaffolding
+## การสร้างโครงสร้างโค้ด
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Angular CLI มีเครื่องมือสำหรับสร้างโครงสร้างโค้ด สามารถสร้างคอมโพเนนต์ใหม่ได้ด้วยคำสั่ง:
 
 ```bash
 ng generate component component-name
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+ดูรายการ schematics ที่ใช้งานได้ทั้งหมด เช่น `components`, `directives` หรือ `pipes` ด้วยคำสั่ง:
 
 ```bash
 ng generate --help
 ```
 
-## Building
+## การ build โปรเจกต์
 
-To build the project run:
+ใช้คำสั่งต่อไปนี้เพื่อ build โปรเจกต์:
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+คำสั่งนี้จะ compile โปรเจกต์และเก็บไฟล์ผลลัพธ์ไว้ในโฟลเดอร์ `dist/` โดย production build จะปรับแต่งแอปพลิเคชันเพื่อประสิทธิภาพและความเร็วโดยอัตโนมัติ
 
-## Running unit tests
+## การรัน unit tests
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+รัน unit tests ด้วย test runner [Vitest](https://vitest.dev/) โดยใช้คำสั่ง:
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+## การรัน end-to-end tests
 
-For end-to-end (e2e) testing, run:
+รันการทดสอบ end-to-end (e2e) ด้วยคำสั่ง:
 
 ```bash
 ng e2e
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Angular CLI ไม่มี framework สำหรับการทดสอบ end-to-end มาให้เป็นค่าเริ่มต้น ผู้พัฒนาสามารถเลือก framework ที่เหมาะสมกับความต้องการของโปรเจกต์ได้
 
-## Additional Resources
+## แหล่งข้อมูลเพิ่มเติม
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+ดูข้อมูลเพิ่มเติมเกี่ยวกับการใช้งาน Angular CLI และรายละเอียดคำสั่งต่าง ๆ ได้ที่หน้า [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli)
