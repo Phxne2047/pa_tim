@@ -319,12 +319,6 @@ export class CustomerManagement implements OnInit, AfterViewInit, OnDestroy {
       this.formError.set('กรุณาระบุพิกัดละติจูดและลองจิจูดที่ถูกต้อง');
       return;
     }
-    if (L.latLng(this.shop.lat, this.shop.lng).distanceTo([latitude, longitude]) > 3000) {
-      this.formError.set(
-        'ตำแหน่งลูกค้าอยู่นอกพื้นที่จัดส่ง กรุณาเลือกพิกัดภายในรัศมี 3 กิโลเมตรจากร้าน',
-      );
-      return;
-    }
     this.isSaving.set(true);
     try {
       const dto: CreateCustomerDto = { ...this.formData, latitude, longitude };
