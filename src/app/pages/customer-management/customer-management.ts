@@ -380,7 +380,7 @@ export class CustomerManagement implements OnInit, AfterViewInit, OnDestroy {
       title: this.shop.name,
       icon: L.divIcon({
         className: 'customer-shop-pin',
-        html: '<span>🍱 ร้านป้าติ๋ม</span>',
+        html: '<span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 8h16l-1.5 12h-13L4 8Zm2-4h12l2 3H4l2-3Zm2 7v6m4-6v6m4-6v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> ร้านป้าติ๋ม</span>',
         iconSize: [124, 32],
         // วางป้ายข้างจุดร้าน เพื่อให้เห็นทั้งร้านและหมุดบ้านเมื่อพิกัดตรงกัน
         iconAnchor: [-12, 16],
@@ -396,7 +396,7 @@ export class CustomerManagement implements OnInit, AfterViewInit, OnDestroy {
     this.markerMap.clear();
     const icon = L.divIcon({
       className: 'customer-home-pin',
-      html: '<span>⌂</span>',
+      html: '<span><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>',
       iconSize: [30, 30],
       iconAnchor: [15, 15],
     });

@@ -364,3 +364,8 @@ tbody tr:hover {
     flex-basis: 100%;
   }
 }
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.action-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; white-space: nowrap; }
+.action-button svg { flex: 0 0 auto; }
+.button-spinner { width: 0.9rem; height: 0.9rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: customer-spin 0.7s linear infinite; }
+@keyframes customer-spin { to { transform: rotate(360deg); } }
